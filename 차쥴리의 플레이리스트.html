@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>차쥴리의 Playlist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            width: 100%;
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            width: 50%;
+            margin: 0 auto;
+        }
+        
+        main {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .page {
+            border: 1px solid #ddd;
+            padding: 10px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .content {
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            min-height: 200px;
+        }
+
+        .content div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .content div span {
+            margin-right: 10px;
+        }
+        
+        .delete-btn {
+            margin-left: auto;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            margin-top: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>차쥴리의 Playlist</h1>
+    </header>
+    <main>
+        <div id="am" class="page">
+            <h2>AM</h2>
+            <div class="content" id="amContent"></div>
+            <input type="text" id="amInput" placeholder="텍스트 추가">
+            <button onclick="addText('am')">추가</button>
+        </div>
+        <div id="pm" class="page">
+            <h2>PM</h2>
+            <div class="content" id="pmContent"></div>
+            <input type="text" id="pmInput" placeholder="텍스트 추가">
+            <button onclick="addText('pm')">추가</button>
+        </div>
+        <div id="night" class="page">
+            <h2>NIGHT</h2>
+            <div class="content" id="nightContent"></div>
+            <input type="text" id="nightInput" placeholder="텍스트 추가">
+            <button onclick="addText('night')">추가</button>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadContent('am');
+            loadContent('pm');
+            loadContent('night');
+
+            // Enter 키 이벤트 리스너 추가
+            document.getElementById('amInput').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    addText('am');
+                }
+            });
+
+            document.getElementById('pmInput').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    addText('pm');
+                }
+            });
+
+            document.getElementById('nightInput').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    addText('night');
+                }
+            });
+        });
+
+        function addText(pageId) {
+            const input = document.getElementById(`${pageId}Input`);
+            const text = input.value.trim();
+            if (text) {
+                const contentDiv = document.getElementById(`${pageId}Content`);
+                const newTextBlock = document.createElement('div');
+                newTextBlock.classList.add('text-entry');
+                newTextBlock.innerHTML = `<span>🎵</span>${text}<button class="delete-btn" onclick="deleteText(this)">x</button>`;
+                contentDiv.appendChild(newTextBlock);
+                input.value = '';
+                saveContent(pageId);
+            }
+        }
+
+        function saveContent(pageId) {
+            const contentDiv = document.getElementById(`${pageId}Content`);
+            const texts = [];
+            contentDiv.querySelectorAll('.text-entry').forEach(div => {
+                texts.push(div.textContent.trim().slice(2)); // Remove the music note emoji and 'x'
+            });
+            localStorage.setItem(pageId, JSON.stringify(texts));
+        }
+
+        function loadContent(pageId) {
+            const texts = JSON.parse(localStorage.getItem(pageId) || '[]');
+            const contentDiv = document.getElementById(`${pageId}Content`);
+            contentDiv.innerHTML = ''; // Clear existing content
+
+            texts.forEach(text => {
+                const newTextBlock = document.createElement('div');
+                newTextBlock.classList.add('text-entry');
+                newTextBlock.innerHTML = `<span>🎵</span>${text}<button class="delete-btn" onclick="deleteText(this)">x</button>`;
+                contentDiv.appendChild(newTextBlock);
+            });
+        }
+
+        function deleteText(button) {
+            const textEntry = button.parentElement;
+            const pageId = textEntry.parentElement.id;
+            textEntry.remove();
+            saveContent(pageId); // Update local storage after deletion
+        }
+
+        // Clear all saved content on page load (for testing purposes)
+        //localStorage.clear();
+    </script>
+</body>
+</html>
